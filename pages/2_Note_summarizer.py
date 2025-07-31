@@ -4,16 +4,17 @@ import os
 import tempfile
 import fitz  # PyMuPDF
 from docx import Document
+from io import BytesIO
 
 # --- Gemini API Setup ---
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+API_KEY = os.getenv("API_KEY")
 
 def ask_gemini(text):
     prompt = (
-        "Summarize the following academic notes in simple, clear English that a 10-year-old can understand:\n\n"
+        "Summarize the following all academic notes in simple, clear English that is easy to understand:\n\n"
         f"{text}\n\nSummary:"
     )
-    url = f"https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key={GEMINI_API_KEY}"
+    url = f"https://generativelanguage.googleapis.com/v1/models/gemini-2.5-pro:generateContent?key={API_KEY}"
     headers = {"Content-Type": "application/json"}
     data = {"contents": [{"parts": [{"text": prompt}]}]}
     try:
@@ -60,6 +61,24 @@ def extract_text(file):
     else:
         return None
 
+def summary_to_docx(summary):
+    doc = Document()
+    for line in summary.splitlines():
+        if line.strip().startswith("# "):
+            doc.add_heading(line.replace("#", "").strip(), level=1)
+        elif line.strip().startswith("## "):
+            doc.add_heading(line.replace("#", "").strip(), level=2)
+        elif line.strip().startswith("### "):
+            doc.add_heading(line.replace("#", "").strip(), level=3)
+        elif line.strip().startswith("* ") or line.strip().startswith("- "):
+            doc.add_paragraph(line.strip()[2:], style='List Bullet')
+        else:
+            doc.add_paragraph(line)
+    buffer = BytesIO()
+    doc.save(buffer)
+    buffer.seek(0)
+    return buffer
+
 # --- UI ---
 st.title("📚 AI Note Summarizer")
 st.caption("Summarize your notes into easy-to-read points.")
@@ -93,15 +112,17 @@ if uploaded_file:
 
 if summary:
     st.markdown("### 📝 Summary")
-    st.text_area("Summary", summary, height=200, key="summary_box")
+    st.markdown(summary, unsafe_allow_html=True)
     col1, col2 = st.columns(2)
     with col1:
-        st.button("Copy Summary", on_click=lambda: st.session_state.update({"summary_box": summary}), use_container_width=True)
+        # (Copy button code as before, or use JS solution for clipboard)
+        pass
     with col2:
+        docx_file = summary_to_docx(summary)
         st.download_button(
             "Download Summary",
-            summary,
-            file_name="summary.txt",
-            mime="text/plain",
+            docx_file,
+            file_name="summary.docx",
+            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
             use_container_width=True
         )
