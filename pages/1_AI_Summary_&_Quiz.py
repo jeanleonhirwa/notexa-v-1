@@ -2,6 +2,8 @@ import streamlit as st
 import requests
 import os
 from dotenv import load_dotenv
+from fpdf import FPDF
+import io
 
 # Load environment variables from .env file
 load_dotenv()
@@ -86,5 +88,63 @@ if st.button("Generate"):
                     st.subheader("Answers:")
                     for a in answers:
                         st.write(f"- {a}")
+
+                # --- PDF Generation ---
+                pdf = FPDF()
+                pdf.add_page()
+                pdf.set_font("Arial", size=14)
+                pdf.cell(0, 10, "Summary", ln=True, align="L")
+                pdf.set_font("Arial", size=12)
+                pdf.multi_cell(0, 10, summary.strip() if summary else "No summary found.")
+                pdf.ln(5)
+                pdf.set_font("Arial", size=14)
+                pdf.cell(0, 10, "Quiz Questions", ln=True, align="L")
+                pdf.set_font("Arial", size=12)
+                if quiz:
+                    for idx, q in enumerate(quiz, 1):
+                        pdf.multi_cell(0, 10, f"{idx}. {q}")
+                else:
+                    pdf.multi_cell(0, 10, "No quiz found.")
+                pdf.ln(5)
+                pdf.set_font("Arial", size=14)
+                pdf.cell(0, 10, "Answers", ln=True, align="L")
+                pdf.set_font("Arial", size=12)
+                if answers:
+                    for idx, a in enumerate(answers, 1):
+                        pdf.multi_cell(0, 10, f"{idx}. {a}")
+                else:
+                    pdf.multi_cell(0, 10, "No answers found.")
+                # Output PDF to memory (fixed for fpdf)
+                pdf_bytes = pdf.output(dest='S').encode('latin1')
+                pdf_buffer = io.BytesIO(pdf_bytes)
+                st.download_button(
+                    label="Download Summary & Quiz as PDF",
+                    data=pdf_buffer,
+                    file_name="summary_quiz.pdf",
+                    mime="application/pdf"
+                )
     else:
         st.warning("Please enter a topic or question.")
+
+# --- Go Premium Button in Sidebar ---
+st.sidebar.markdown('''<hr style="margin-top:2em;margin-bottom:0.5em;">''', unsafe_allow_html=True)
+st.sidebar.markdown('''
+    <a href="/premium" target="_self" style="
+        display: block;
+        background: linear-gradient(90deg, #FFD700 0%, #FFB300 100%);
+        color: #222;
+        padding: 0.5em 1.2em;
+        border-radius: 2em;
+        font-weight: bold;
+        font-size: 1.1em;
+        text-align: center;
+        text-decoration: none;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        border: 2px solid #fff2b2;
+        margin-top: 0.5em;
+        margin-bottom: 1em;
+        transition: background 0.2s;
+    " onmouseover="this.style.background='#FFB300'" onmouseout="this.style.background='linear-gradient(90deg, #FFD700 0%, #FFB300 100%)'">
+        ⭐ Go premium
+    </a>
+''', unsafe_allow_html=True)
