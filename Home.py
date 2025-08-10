@@ -1,4 +1,8 @@
 import streamlit as st
+st.set_page_config(
+    page_title="Notexa -Learning Made Simple.",
+    page_icon="assets/logo.png"
+)
 
 # --- Go Premium Button in Sidebar ---
 st.sidebar.markdown('''<hr style="margin-top:2em;margin-bottom:0.5em;">''', unsafe_allow_html=True)

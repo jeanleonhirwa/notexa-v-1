@@ -1,4 +1,8 @@
 import streamlit as st
+st.set_page_config(
+    page_title="Notexa -Learning Made Simple.",
+    page_icon="assets/logo.png"
+)
 import requests
 import os
 from dotenv import load_dotenv

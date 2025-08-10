@@ -1,10 +1,18 @@
 import streamlit as st
 
-st.set_page_config(page_title="Notexa v1 - Futuristic Landing", layout="centered", page_icon="🧠")
+st.set_page_config(page_title="Notexa -Learning Made Simple.", layout="centered", page_icon="assets/logo.png")
 
-# Futuristic Glassmorphism & Gradient CSS
+# Hide Streamlit sidebar and hamburger menu with CSS
 st.markdown("""
     <style>
+        /* Hide sidebar and hamburger menu */
+        [data-testid="stSidebar"], .css-1lcbmhc.e1fqkh3o3, .css-164nlkn.e1fqkh3o3 {
+            display: none !important;
+        }
+        /* Hide the sidebar collapse/expand button */
+        [data-testid="collapsedControl"] {
+            display: none !important;
+        }
         body {
             background: linear-gradient(120deg, #0f2027 0%, #2c5364 100%);
         }
@@ -93,9 +101,10 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.markdown("<div class='glass'><h4 align='center'>👋 Welcome to Notexa</h4></div>", unsafe_allow_html=True)
+# st.markdown("<div class='glass'>", unsafe_allow_html=True)
+# st.image("assets/logo.png", width=70)
+st.markdown("<h4 align='center'>👋 Welcome to Notexa</h4></div>", unsafe_allow_html=True)
 
-st.image("assets/logo.png", width=90)
 st.markdown("<div class='center headline'>Notexa v1</div>", unsafe_allow_html=True)
 st.markdown("<div class='center tagline'>The future of smart learning is here. <br>Summarize, quiz, and master knowledge with AI.</div>", unsafe_allow_html=True)
 

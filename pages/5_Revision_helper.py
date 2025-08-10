@@ -1,4 +1,8 @@
 import streamlit as st
+st.set_page_config(
+    page_title="Notexa -Learning Made Simple.",
+    page_icon="assets/logo.png"
+)
 
 st.title("📈 Smart Revision Helper")
 st.caption("Get smart revision tips and reminders. (Coming soon)")
