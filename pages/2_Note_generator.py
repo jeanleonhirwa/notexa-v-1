@@ -66,12 +66,15 @@ if st.session_state['notes']:
             font_path = None
     if font_path and os.path.exists(font_path):
         pdf.add_font("DejaVu", "", font_path, uni=True)
+        pdf.set_left_margin(15)
+        pdf.set_right_margin(15)
         pdf.set_font("DejaVu", size=14)
         pdf.cell(0, 10, "Generated Notes", ln=True, align="L")
         pdf.set_font("DejaVu", size=12)
         for line in st.session_state['notes'].splitlines():
-            pdf.multi_cell(0, 10, line)
-        pdf_bytes = pdf.output(dest='S').encode('utf-8')
+            safe_line = line.replace("\n", " ")
+            pdf.multi_cell(180, 10, safe_line)
+        pdf_bytes = pdf.output(dest='S')
         pdf_buffer = io.BytesIO(pdf_bytes)
         # Regenerate and Download buttons in a row
         col1, col2 = st.columns([1, 1])
@@ -113,6 +116,30 @@ st.sidebar.markdown('''
         margin-bottom: 1em;
         transition: background 0.2s;
     " onmouseover="this.style.background='#FFB300'" onmouseout="this.style.background='linear-gradient(90deg, #FFD700 0%, #FFB300 100%)'">
-        ⭐ Go premium
+        🙏 Donate
     </a>
 ''', unsafe_allow_html=True)
+st.sidebar.markdown(
+    '<div style="margin-top:3em; margin-bottom:1em; font-size:1.05em;">'
+    '📢 <b>Turn students and teachers into customers.</b> '
+    '<a href="https://your-ad-link.com" target="_blank" style="color:#00b894; font-weight:bold; text-decoration:underline;">Advertise on Notexa</a>.'
+    '</div>',
+    unsafe_allow_html=True
+)
+st.markdown('''
+    <style>
+    .notexa-footer {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100vw;
+        background: rgba(255,255,255,0.0);
+        color: #888;
+        text-align: center;
+        font-size: 1em;
+        padding: 0.7em 0 0.5em 0;
+        z-index: 9999;
+    }
+    </style>
+    <div class="notexa-footer">© 2025. Made with ❤️ by the Hirwa Leon</div>
+    ''', unsafe_allow_html=True)

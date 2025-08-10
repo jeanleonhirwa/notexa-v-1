@@ -91,31 +91,35 @@ if st.button("Generate"):
 
                 # --- PDF Generation ---
                 pdf = FPDF()
+                pdf.set_left_margin(15)
+                pdf.set_right_margin(15)
                 pdf.add_page()
                 pdf.set_font("Arial", size=14)
                 pdf.cell(0, 10, "Summary", ln=True, align="L")
                 pdf.set_font("Arial", size=12)
-                pdf.multi_cell(0, 10, summary.strip() if summary else "No summary found.")
+                pdf.multi_cell(180, 10, summary.strip() if summary else "No summary found.")
                 pdf.ln(5)
                 pdf.set_font("Arial", size=14)
                 pdf.cell(0, 10, "Quiz Questions", ln=True, align="L")
                 pdf.set_font("Arial", size=12)
                 if quiz:
                     for idx, q in enumerate(quiz, 1):
-                        pdf.multi_cell(0, 10, f"{idx}. {q}")
+                        safe_q = q.replace("\n", " ")
+                        pdf.multi_cell(180, 10, f"{idx}. {safe_q}")
                 else:
-                    pdf.multi_cell(0, 10, "No quiz found.")
+                    pdf.multi_cell(180, 10, "No quiz found.")
                 pdf.ln(5)
                 pdf.set_font("Arial", size=14)
                 pdf.cell(0, 10, "Answers", ln=True, align="L")
                 pdf.set_font("Arial", size=12)
                 if answers:
                     for idx, a in enumerate(answers, 1):
-                        pdf.multi_cell(0, 10, f"{idx}. {a}")
+                        safe_a = a.replace("\n", " ")
+                        pdf.multi_cell(180, 10, f"{idx}. {safe_a}")
                 else:
-                    pdf.multi_cell(0, 10, "No answers found.")
+                    pdf.multi_cell(180, 10, "No answers found.")
                 # Output PDF to memory (fixed for fpdf)
-                pdf_bytes = pdf.output(dest='S').encode('latin1')
+                pdf_bytes = pdf.output(dest='S')
                 pdf_buffer = io.BytesIO(pdf_bytes)
                 st.download_button(
                     label="Download Summary & Quiz as PDF",
@@ -145,6 +149,30 @@ st.sidebar.markdown('''
         margin-bottom: 1em;
         transition: background 0.2s;
     " onmouseover="this.style.background='#FFB300'" onmouseout="this.style.background='linear-gradient(90deg, #FFD700 0%, #FFB300 100%)'">
-        ⭐ Go premium
+        🙏 Donate
     </a>
 ''', unsafe_allow_html=True)
+st.sidebar.markdown(
+    '<div style="margin-top:3em; margin-bottom:1em; font-size:1.05em;">'
+    '📢 <b>Turn students and teachers into customers.</b> '
+    '<a href="https://your-ad-link.com" target="_blank" style="color:#00b894; font-weight:bold; text-decoration:underline;">Advertise on Notexa</a>.'
+    '</div>',
+    unsafe_allow_html=True
+)
+st.markdown('''
+    <style>
+    .notexa-footer {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100vw;
+        background: rgba(255,255,255,0.0);
+        color: #888;
+        text-align: center;
+        font-size: 1em;
+        padding: 0.7em 0 0.5em 0;
+        z-index: 9999;
+    }
+    </style>
+    <div class="notexa-footer">© 2025. Made with ❤️ by the Hirwa Leon</div>
+    ''', unsafe_allow_html=True)

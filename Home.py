@@ -19,9 +19,16 @@ st.sidebar.markdown('''
         margin-bottom: 1em;
         transition: background 0.2s;
     " onmouseover="this.style.background='#FFB300'" onmouseout="this.style.background='linear-gradient(90deg, #FFD700 0%, #FFB300 100%)'">
-        ⭐ Go premium
+        🙏 Donate
     </a>
 ''', unsafe_allow_html=True)
+st.sidebar.markdown(
+    '<div style="margin-top:3em; margin-bottom:1em; font-size:1.05em;">'
+    '📢 <b>Turn students and teachers into customers.</b> '
+    '<a href="https://your-ad-link.com" target="_blank" style="color:#00b894; font-weight:bold; text-decoration:underline;">Advertise on Notexa</a>.'
+    '</div>',
+    unsafe_allow_html=True
+)
 
 # --- Language Switcher ---
 lang = st.selectbox(

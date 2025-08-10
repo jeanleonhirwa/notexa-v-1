@@ -95,7 +95,7 @@ st.markdown("""
 
 st.markdown("<div class='glass'><h4 align='center'>👋 Welcome to Notexa</h4></div>", unsafe_allow_html=True)
 
-# st.image("https://cdn-icons-png.flaticon.com/512/1995/1995574.png", width=90, output_format="PNG")
+st.image("assets/logo.png", width=90)
 st.markdown("<div class='center headline'>Notexa v1</div>", unsafe_allow_html=True)
 st.markdown("<div class='center tagline'>The future of smart learning is here. <br>Summarize, quiz, and master knowledge with AI.</div>", unsafe_allow_html=True)
 

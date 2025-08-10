@@ -23,6 +23,30 @@ st.sidebar.markdown('''
         margin-bottom: 1em;
         transition: background 0.2s;
     " onmouseover="this.style.background='#FFB300'" onmouseout="this.style.background='linear-gradient(90deg, #FFD700 0%, #FFB300 100%)'">
-        ⭐ Go premium
+        🙏 Donate
     </a>
 ''', unsafe_allow_html=True)
+st.sidebar.markdown(
+    '<div style="margin-top:3em; margin-bottom:1em; font-size:1.05em;">'
+    '📢 <b>Turn students and teachers into customers.</b> '
+    '<a href="https://your-ad-link.com" target="_blank" style="color:#00b894; font-weight:bold; text-decoration:underline;">Advertise on Notexa</a>.'
+    '</div>',
+    unsafe_allow_html=True
+)
+st.markdown('''
+    <style>
+    .notexa-footer {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100vw;
+        background: rgba(255,255,255,0.0);
+        color: #888;
+        text-align: center;
+        font-size: 1em;
+        padding: 0.7em 0 0.5em 0;
+        z-index: 9999;
+    }
+    </style>
+    <div class="notexa-footer">© 2025. Made with ❤️ by the Hirwa Leon</div>
+    ''', unsafe_allow_html=True)
