@@ -1,4 +1,7 @@
 import streamlit as st
+import analytics
+
+analytics.load_analytics()
 st.set_page_config(
     page_title="Notexa -Learning Made Simple.",
     page_icon="assets/logo.png"
