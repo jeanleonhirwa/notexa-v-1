@@ -9,26 +9,12 @@ st.set_page_config(
 
 # --- Go Premium Button in Sidebar ---
 st.sidebar.markdown('''<hr style="margin-top:2em;margin-bottom:0.5em;">''', unsafe_allow_html=True)
-st.sidebar.markdown('''
-    <a href="/premium" target="_self" style="
-        display: block;
-        background: linear-gradient(90deg, #FFD700 0%, #FFB300 100%);
-        color: #222;
-        padding: 0.5em 1.2em;
-        border-radius: 2em;
-        font-weight: bold;
-        font-size: 1.1em;
-        text-align: center;
-        text-decoration: none;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        border: 2px solid #fff2b2;
-        margin-top: 0.5em;
-        margin-bottom: 1em;
-        transition: background 0.2s;
-    " onmouseover="this.style.background='#FFB300'" onmouseout="this.style.background='linear-gradient(90deg, #FFD700 0%, #FFB300 100%)'">
-        🙏 Donate
-    </a>
-''', unsafe_allow_html=True)
+st.sidebar.page_link(
+    "pages/_Donate.py",
+    label="🙏 Donate",
+    icon="💝",
+    use_container_width=True
+)
 st.sidebar.markdown(
     '<div style="margin-top:3em; margin-bottom:1em; font-size:1.05em;">'
     '📢 <b>Turn students and teachers into customers.</b> '

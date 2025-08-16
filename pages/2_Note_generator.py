@@ -107,7 +107,7 @@ if st.session_state['notes']:
 # --- Go Premium Button in Sidebar ---
 st.sidebar.markdown('''<hr style="margin-top:2em;margin-bottom:0.5em;">''', unsafe_allow_html=True)
 st.sidebar.markdown('''
-    <a href="/premium" target="_self" style="
+    <a href="/donate" target="_self" style="
         display: block;
         background: linear-gradient(90deg, #FFD700 0%, #FFB300 100%);
         color: #222;
