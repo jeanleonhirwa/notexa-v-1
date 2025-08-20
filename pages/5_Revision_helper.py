@@ -1,5 +1,17 @@
 import streamlit as st
 import analytics
+import requests
+import json
+from datetime import datetime, timedelta
+from dotenv import load_dotenv
+import os
+import base64
+from io import BytesIO
+import matplotlib.pyplot as plt
+
+# Load environment variables
+load_dotenv()
+API_KEY = os.getenv("API_KEY")
 
 analytics.load_analytics()
 st.set_page_config(
@@ -7,53 +19,350 @@ st.set_page_config(
     page_icon="assets/logo.png"
 )
 
-st.title("📈 Smart Revision Helper")
-st.caption("Get smart revision tips and reminders. (Coming soon)")
-st.markdown("This tool is coming soon! 😊 Stay tuned as we build it for you.")
+def ask_gemini(prompt):
+    url = f"https://generativelanguage.googleapis.com/v1/models/gemini-2.5-pro:generateContent?key={API_KEY}"
+    headers = {"Content-Type": "application/json"}
+    data = {"contents": [{"parts": [{"text": prompt}]}]}
 
-# --- Go Premium Button in Sidebar ---
-st.sidebar.markdown('''<hr style="margin-top:2em;margin-bottom:0.5em;">''', unsafe_allow_html=True)
-st.sidebar.markdown('''
-    <a href="/premium" target="_self" style="
-        display: block;
-        background: linear-gradient(90deg, #FFD700 0%, #FFB300 100%);
-        color: #222;
-        padding: 0.5em 1.2em;
-        border-radius: 2em;
-        font-weight: bold;
-        font-size: 1.1em;
-        text-align: center;
-        text-decoration: none;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        border: 2px solid #fff2b2;
-        margin-top: 0.5em;
-        margin-bottom: 1em;
-        transition: background 0.2s;
-    " onmouseover="this.style.background='#FFB300'" onmouseout="this.style.background='linear-gradient(90deg, #FFD700 0%, #FFB300 100%)'">
-        🙏 Donate
-    </a>
-''', unsafe_allow_html=True)
-st.sidebar.markdown(
-    '<div style="margin-top:3em; margin-bottom:1em; font-size:1.05em;">'
-    '📢 <b>Turn students and teachers into customers.</b> '
-    '<a href="https://your-ad-link.com" target="_blank" style="color:#00b894; font-weight:bold; text-decoration:underline;">Advertise on Notexa</a>.'
-    '</div>',
-    unsafe_allow_html=True
-)
-st.markdown('''
-    <style>
-    .notexa-footer {
-        position: fixed;
-        left: 0;
-        bottom: 0;
-        width: 100vw;
-        background: rgba(255,255,255,0.0);
-        color: #888;
-        text-align: center;
-        font-size: 1em;
-        padding: 0.7em 0 0.5em 0;
-        z-index: 9999;
+    try:
+        res = requests.post(url, headers=headers, json=data)
+        res.raise_for_status()
+        return res.json()['candidates'][0]['content']['parts'][0]['text']
+    except Exception as e:
+        return f"❌ Gemini API error: {e}"
+
+def create_study_plan(subject, exam_date, confidence_level, available_hours):
+    days_until_exam = (exam_date - datetime.now().date()).days
+    
+    prompt = f"""
+    Create a detailed {days_until_exam}-day study plan for {subject} with these parameters:
+    - Days until exam: {days_until_exam}
+    - Current confidence level: {confidence_level}/10
+    - Available study hours per day: {available_hours}
+
+    Format the response as follows:
+    ### Study Plan
+    [day-by-day plan with topics, techniques, and schedules]
+
+    ### Daily Schedule Template
+    [break down of study sessions and breaks]
+
+    ### Key Focus Areas
+    [list main topics to master]
+
+    ### Review Strategy
+    [how to review previous days' content]
+    """
+    
+    response = ask_gemini(prompt)
+    if response.startswith("❌"):
+        st.error(response)
+        return None
+    
+    return response
+
+def generate_quiz(topic):
+    prompt = f"""
+    Create a quick assessment quiz for: {topic}
+    Include 5 multiple choice questions with explanations.
+    
+    Format as:
+    ### Questions
+    1. [Question 1]
+    A) [Option A]
+    B) [Option B]
+    C) [Option C]
+    D) [Option D]
+    
+    ### Answers
+    1. [Correct option]: [Explanation]
+    """
+    
+    response = ask_gemini(prompt)
+    if response.startswith("❌"):
+        st.error(response)
+        return None
+    
+    return response
+
+def generate_flashcards(topic):
+    prompt = f"""
+    Create 5 flashcards for {topic}.
+    Format as:
+    ### Flashcard 1
+    Front: [key concept/question]
+    Back: [explanation/answer]
+    
+    Continue for all 5 cards...
+    """
+    return ask_gemini(prompt)
+
+def generate_mind_map(topic):
+    prompt = f"""
+    Create a simple mind map for {topic}.
+    Format as a bulleted list with main topic in the center:
+    
+    • {topic}
+        ◦ [Main Concept 1]
+            ▪ [Sub-concept 1.1]
+            ▪ [Sub-concept 1.2]
+        ◦ [Main Concept 2]
+            ▪ [Sub-concept 2.1]
+            ▪ [Sub-concept 2.2]
+    """
+    return ask_gemini(prompt)
+
+def get_learning_style_tips(learning_style):
+    prompt = f"""
+    Provide 5 specific study techniques for a {learning_style} learner.
+    Format as:
+    ### Study Techniques for {learning_style} Learners
+    1. [Technique 1]
+    2. [Technique 2]
+    etc.
+    
+    Include practical examples for each technique.
+    """
+    return ask_gemini(prompt)
+
+def create_pdf_summary(subject, plan, quiz):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+    
+    # Add content
+    pdf.cell(200, 10, txt=f"Study Plan: {subject}", ln=True, align='C')
+    pdf.multi_cell(0, 10, txt=plan)
+    if quiz:
+        pdf.add_page()
+        pdf.cell(200, 10, txt="Practice Quiz", ln=True, align='C')
+        pdf.multi_cell(0, 10, txt=quiz)
+    
+    # Return PDF as base64 string
+    pdf_output = BytesIO()
+    pdf.output(pdf_output)
+    pdf_base64 = base64.b64encode(pdf_output.getvalue()).decode()
+    return pdf_base64
+
+# Add custom CSS for better UI
+st.markdown("""
+<style>
+    /* Friendly colors and rounded corners */
+    .stButton button {
+        border-radius: 20px;
+        padding: 15px 25px;
+        font-size: 16px;
     }
-    </style>
-    <div class="notexa-footer">© 2025. Made with ❤️ by the Hirwa Leon</div>
-    ''', unsafe_allow_html=True)
+    
+    /* Different colors for different sections */
+    .study-plan-section { background: #f0f8ff; padding: 20px; border-radius: 10px; }
+    .materials-section { background: #fff0f5; padding: 20px; border-radius: 10px; }
+    .progress-section { background: #f0fff0; padding: 20px; border-radius: 10px; }
+    
+    /* Make expanders more visible */
+    .streamlit-expanderHeader {
+        font-size: 1.1em;
+        background: #f0f2f6;
+        border-radius: 10px;
+    }
+    
+    /* Better spacing */
+    .block-container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+def main():
+    st.title("📚 Your Study Buddy")
+    
+    # Age Group Selection
+    age_group = st.radio(
+        "I am a...",
+        ["Primary School Student (Ages 7-12)", 
+         "Secondary School Student (Ages 13-18)",
+         "University Student (Ages 18+)"],
+        horizontal=True,
+        help="Select your age group for personalized help"
+    )
+    
+    st.markdown("---")
+    
+    # Simplified Subject Selection based on age group
+    if "Primary" in age_group:
+        subjects = ["Mathematics", "Science", "English", "Social Studies", "Other"]
+        helper_text = "What subject do you want help with? 😊"
+    elif "Secondary" in age_group:
+        subjects = ["Mathematics", "Physics", "Chemistry", "Biology", "History", "Geography", 
+                   "Literature", "Other"]
+        helper_text = "Which subject are you studying? 📚"
+    else:
+        subjects = ["Other"]
+        helper_text = "What course are you studying? 🎓"
+    
+    col1, col2 = st.columns([2, 1])
+    
+    with col1:
+        if "Other" in subjects:
+            subject = st.text_input(helper_text)
+        else:
+            subject = st.selectbox(helper_text, subjects)
+    
+    with col2:
+        exam_date = st.date_input(
+            "When is your test/exam? 📅",
+            min_value=datetime.now().date(),
+            help="Select the date of your exam"
+        )
+    
+    # Simplified Learning Profile
+    st.markdown("### 📋 Your Learning Profile")
+    col3, col4 = st.columns(2)
+    
+    with col3:
+        confidence = st.select_slider(
+            "How well do you know this subject?",
+            options=["Not at all", "A little bit", "Somewhat", "Quite well", "Very well"],
+            value="Somewhat",
+            help="This helps us make a better plan for you"
+        )
+        
+        # Convert text confidence to number
+        confidence_map = {
+            "Not at all": 2, "A little bit": 4, "Somewhat": 6,
+            "Quite well": 8, "Very well": 10
+        }
+        confidence_num = confidence_map[confidence]
+    
+    with col4:
+        if "Primary" in age_group:
+            hours_options = [0.5, 1, 1.5, 2]
+            default_hours = 1
+        else:
+            hours_options = [1, 2, 3, 4, 5, 6]
+            default_hours = 2
+        
+        study_hours = st.select_slider(
+            "How many hours can you study each day?",
+            options=hours_options,
+            value=default_hours,
+            help="Be realistic! It's better to study a little bit every day"
+        )
+    
+    # Learning Style with icons
+    st.markdown("### 🧠 How do you learn best?")
+    learning_style = st.selectbox(
+        "I learn best when I...",
+        ["👀 See pictures and diagrams (Visual)",
+         "👂 Listen and discuss (Auditory)",
+         "✍️ Read and write (Reading/Writing)",
+         "🤹 Do practical activities (Kinesthetic)"],
+        help="This helps us suggest the best study methods for you"
+    )
+    learning_style = learning_style.split("(")[1][:-1]  # Extract style name
+    
+    # Action Buttons
+    st.markdown("### 🚀 Let's Get Started!")
+    col5, col6 = st.columns(2)
+    
+    with col5:
+        if st.button("📝 Create My Study Plan", use_container_width=True):
+            if subject and exam_date:
+                with st.spinner("Making your perfect study plan..."):
+                    plan = create_study_plan(
+                        subject,
+                        exam_date,
+                        confidence_num,
+                        study_hours
+                    )
+                    
+                    if plan:
+                        sections = plan.split("###")
+                        for section in sections[1:]:  # Skip first empty section
+                            title, content = section.split("\n", 1)
+                            with st.expander(f"📚 {title.strip()}"):
+                                st.markdown(content.strip())
+                                
+                                if "Key Focus Areas" in title:
+                                    if st.button("Generate Practice Quiz", key="quiz"):
+                                        quiz = generate_quiz(subject)
+                                        if quiz:
+                                            st.markdown(quiz)
+                    else:
+                        st.error("Failed to generate study plan. Please try again.")
+            else:
+                st.warning("Please enter both subject and exam date.")
+
+    with col6:
+        if st.button("🎯 Make Study Materials", use_container_width=True):
+            if subject:
+                with st.spinner("Creating fun study materials..."):
+                    # Generate Flashcards
+                    with st.expander("📑 Flashcards"):
+                        flashcards = generate_flashcards(subject)
+                        if flashcards:
+                            st.markdown(flashcards)
+                    
+                    # Generate Mind Map
+                    with st.expander("🗺️ Mind Map"):
+                        mind_map = generate_mind_map(subject)
+                        if mind_map:
+                            st.markdown(mind_map)
+                    
+                    # Learning Style Tips
+                    with st.expander(f"💡 Tips for {learning_style} Learners"):
+                        tips = get_learning_style_tips(learning_style)
+                        if tips:
+                            st.markdown(tips)
+                    
+                    # Export Options
+                    if st.button("📥 Export Study Materials"):
+                        pdf_data = create_pdf_summary(
+                            subject,
+                            mind_map,
+                            generate_quiz(subject)
+                        )
+                        href = f'<a href="data:application/pdf;base64,{pdf_data}" download="study_plan.pdf">Download PDF</a>'
+                        st.markdown(href, unsafe_allow_html=True)
+            else:
+                st.warning("Please enter a subject first.")
+
+    # Progress Tracking (simplified for younger students)
+    if subject:
+        st.markdown("---")
+        st.markdown("### 🌟 Track Your Progress")
+        
+        mood = st.select_slider(
+            "How do you feel about your studying today?",
+            options=["😟", "😐", "🙂", "😊", "🤩"],
+            value="🙂"
+        )
+        
+        if "Primary" in age_group:
+            hours_studied = st.select_slider(
+                "How long did you study today?",
+                options=["30 minutes", "1 hour", "1.5 hours", "2 hours"],
+                value="1 hour"
+            )
+        else:
+            hours_studied = st.number_input(
+                "Hours studied today",
+                0.0, 24.0, 0.0, 0.5
+            )
+        
+        if st.button("Save My Progress", use_container_width=True):
+            st.success("Progress saved! Keep up the good work!")
+            
+            # Show progress visualization
+            progress_data = {
+                'Initial Confidence': confidence_num,
+                'Current Confidence': confidence_num  # Assuming no change for simplification
+            }
+            fig, ax = plt.subplots()
+            ax.bar(progress_data.keys(), progress_data.values())
+            ax.set_ylim(0, 10)
+            st.pyplot(fig)
+
+if __name__ == "__main__":
+    main()
