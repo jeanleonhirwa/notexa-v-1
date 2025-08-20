@@ -174,6 +174,117 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# Custom CSS with modern design
+st.markdown(""" 
+<style> 
+    /* Modern color palette */ 
+    :root { 
+        --primary: #3498db; 
+        --secondary: #2ecc71; 
+        --accent: #9b59b6; 
+        --background: #f8f9fa; 
+        --text: #2c3e50; 
+    } 
+
+    /* Card-like sections */ 
+    .stApp { 
+        background-color: var(--background); 
+    } 
+
+    .css-1d391kg { 
+        padding: 2rem 1rem; 
+    } 
+
+    /* Button styling */ 
+    .stButton > button { 
+        width: 100%; 
+        border-radius: 15px; 
+        padding: 0.5rem 1rem; 
+        background: linear-gradient(45deg, var(--primary), var(--secondary)); 
+        color: white; 
+        border: none; 
+        transition: transform 0.2s; 
+    }
+    
+    .stButton > button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    /* Section containers */
+    .section-container {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 15px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        margin: 1rem 0;
+    }
+
+    /* Headers */
+    h1, h2, h3 {
+        color: var(--text);
+        font-weight: 600;
+    }
+
+    /* Expander styling */
+    .streamlit-expanderHeader {
+        background: white;
+        border-radius: 10px;
+        border: 1px solid #e1e4e8;
+    }
+
+    /* Progress bars and sliders */
+    .stProgress > div > div > div {
+        background-color: var(--secondary);
+    }
+
+    /* Radio buttons and checkboxes */
+    .stRadio > div {
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .stRadio label {
+        background: white;
+        padding: 0.5rem 1rem;
+        border-radius: 10px;
+        border: 1px solid #e1e4e8;
+        transition: all 0.2s;
+    }
+
+    .stRadio label:hover {
+        border-color: var(--primary);
+    }
+
+    /* Tooltips */
+    .tooltip {
+        position: relative;
+        display: inline-block;
+    }
+
+    .tooltip .tooltiptext {
+        visibility: hidden;
+        background-color: var(--text);
+        color: white;
+        text-align: center;
+        padding: 5px 10px;
+        border-radius: 6px;
+        position: absolute;
+        z-index: 1;
+        bottom: 125%;
+        left: 50%;
+        transform: translateX(-50%);
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .tooltip:hover .tooltiptext {
+        visibility: visible;
+        opacity: 1;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 def main():
     st.title("📚 Your Study Buddy")
     
