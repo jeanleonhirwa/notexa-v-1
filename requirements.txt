@@ -3,4 +3,4 @@ requests
 python-dotenv
 fpdf
 PyMuPDF
-docx
+python-docx
