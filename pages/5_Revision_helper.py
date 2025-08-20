@@ -285,6 +285,122 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+st.markdown("""
+<style>
+    /* Adaptive color scheme using Streamlit's theme */
+    :root {
+        --primary: var(--primary-color);
+        --text: var(--text-color);
+        --background: var(--background-color);
+        --secondary-bg: var(--secondary-background-color);
+    }
+
+    /* Card-like sections with theme-aware colors */
+    .section-container {
+        background: var(--secondary-bg);
+        padding: 1.5rem;
+        border-radius: 15px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        margin: 1rem 0;
+        border: 1px solid rgba(128, 128, 128, 0.1);
+    }
+
+    /* Modern buttons that work in both modes */
+    .stButton > button {
+        width: 100%;
+        border-radius: 15px;
+        padding: 0.5rem 1rem;
+        background: linear-gradient(45deg, var(--primary), #00cc88);
+        color: white;
+        border: none;
+        transition: transform 0.2s;
+    }
+    
+    .stButton > button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(var(--primary), 0.2);
+    }
+
+    /* Headers with theme-aware colors */
+    h1, h2, h3 {
+        color: var(--text);
+        font-weight: 600;
+    }
+
+    /* Expander styling */
+    .streamlit-expanderHeader {
+        background: var(--secondary-bg);
+        border-radius: 10px;
+        border: 1px solid rgba(128, 128, 128, 0.1);
+    }
+
+    /* Radio buttons and checkboxes */
+    .stRadio label {
+        background: var(--secondary-bg);
+        padding: 0.5rem 1rem;
+        border-radius: 10px;
+        border: 1px solid rgba(128, 128, 128, 0.1);
+        transition: all 0.2s;
+    }
+
+    .stRadio label:hover {
+        border-color: var(--primary);
+    }
+
+    /* Success animation with theme-aware colors */
+    .success-animation circle,
+    .success-animation path {
+        stroke: var(--primary);
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# Remove all previous button CSS and replace with this single block:
+
+st.markdown("""
+<style>
+    /* Button styling for both light and dark modes */
+    .stButton > button {
+        width: 100%;
+        border-radius: 15px;
+        padding: 0.75rem 1.5rem;
+        background: linear-gradient(45deg, var(--primary-color), #00cc88);
+        border: 1px solid rgba(128, 128, 128, 0.2);
+        transition: all 0.3s ease;
+        font-size: 1.1em;
+    }
+
+    /* Light mode specific */
+    [data-theme="light"] .stButton > button {
+        color: #ffffff !important;  /* Force white text in light mode */
+        background: linear-gradient(45deg, var(--primary-color), #00cc88);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Dark mode specific */
+    [data-theme="dark"] .stButton > button {
+        color: #ffffff !important;  /* Force white text in dark mode */
+        background: linear-gradient(45deg, var(--primary-color), #00cc88);
+        border: 1px solid rgba(250, 250, 250, 0.2);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Hover effects for both modes */
+    .stButton > button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        border: 1px solid var(--primary-color);
+        opacity: 0.9;
+    }
+
+    /* Active state for both modes */
+    .stButton > button:active {
+        transform: translateY(0px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+</style>
+""", unsafe_allow_html=True)
+
 def main():
     st.title("📚 Your Study Buddy")
     
