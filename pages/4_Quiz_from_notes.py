@@ -21,7 +21,7 @@ def ask_gemini(text):
         "Generate academic quiz from this academic notes, Quiz should have 3 sections, section A(must include 8 multiple choice questions), section B(must include 4 questions, 2 of True or False and 2 questions of Fill in blanks) and Section C(must include 2 open-ended questions):\n\n"
         f"{text}\n\nQuiz:"
     )
-    url = f"https://generativelanguage.googleapis.com/v1/models/gemini-2.5-pro:generateContent?key={API_KEY}"
+    url = f"https://generativelanguage.googleapis.com/v1/models/gemini-2.5-pro:generateContent?key=AIzaSyAY0FuRkzB9yzsdi9v40g7OjPME_f2WWik"
     headers = {"Content-Type": "application/json"}
     data = {"contents": [{"parts": [{"text": prompt}]}]}
     try:

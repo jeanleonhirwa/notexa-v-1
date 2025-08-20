@@ -21,7 +21,7 @@ def ask_gemini(text):
         "Summarize the following all academic notes in simple, clear English that is easy to understand:\n\n"
         f"{text}\n\nSummary:"
     )
-    url = f"https://generativelanguage.googleapis.com/v1/models/gemini-2.5-pro:generateContent?key={API_KEY}"
+    url = f"https://generativelanguage.googleapis.com/v1/models/gemini-2.5-pro:generateContent?key=AIzaSyAY0FuRkzB9yzsdi9v40g7OjPME_f2WWik"
     headers = {"Content-Type": "application/json"}
     data = {"contents": [{"parts": [{"text": prompt}]}]}
     try:

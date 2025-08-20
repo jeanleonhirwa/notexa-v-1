@@ -1,6 +1,8 @@
 streamlit
 requests
 python-dotenv
-google-generativeai
-matplotlib
 fpdf
+PyMuPDF
+python-docx
+matplotlib
+google-generativeai
