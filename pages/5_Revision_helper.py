@@ -306,15 +306,6 @@ st.markdown("""
     }
 
     /* Modern buttons that work in both modes */
-    .stButton > button {
-        width: 100%;
-        border-radius: 15px;
-        padding: 0.5rem 1rem;
-        background: linear-gradient(45deg, var(--primary), #00cc88);
-        color: white;
-        border: none;
-        transition: transform 0.2s;
-    }
     
     .stButton > button:hover {
         transform: translateY(-2px);
@@ -372,7 +363,7 @@ st.markdown("""
 
     /* Light mode specific */
     [data-theme="light"] .stButton > button {
-        color: #ffffff !important;  /* Force white text in light mode */
+        color: #000000 !important;  /* Force black text in light mode */
         background: linear-gradient(45deg, var(--primary-color), #00cc88);
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     }
