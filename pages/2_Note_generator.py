@@ -39,51 +39,66 @@ if not st.session_state['notes']:
 if st.session_state['notes']:
     st.markdown("### 📑 Generated Notes:")
     st.write(st.session_state['notes'])
-    # Prepare PDF with Unicode font (requires fpdf2 and DejaVuSans.ttf in project directory)
+    
+    # Prepare PDF with built-in fonts
     import io
     pdf = FPDF()
     pdf.add_page()
-    # Add Unicode font (DejaVuSans.ttf must be in the same directory or provide full path)
-    font_path = os.path.join(os.path.dirname(__file__), "DejaVuSans.ttf")
-    if not os.path.exists(font_path):
-        # Download the font automatically if not present
-        import urllib.request
-        font_url = "https://github.com/dejavu-fonts/dejavu-fonts/raw/master/ttf/DejaVuSans.ttf"
-        try:
-            with st.spinner("Downloading font for PDF export..."):
-                urllib.request.urlretrieve(font_url, font_path)
-        except Exception as e:
-            st.error(f"Failed to download DejaVuSans.ttf: {e}")
-            font_path = None
-    if font_path and os.path.exists(font_path):
-        pdf.add_font("DejaVu", "", font_path, uni=True)
-        pdf.set_left_margin(15)
-        pdf.set_right_margin(15)
-        pdf.set_font("DejaVu", size=14)
-        pdf.cell(0, 10, "Generated Notes", ln=True, align="L")
-        pdf.set_font("DejaVu", size=12)
-        for line in st.session_state['notes'].splitlines():
-            safe_line = line.replace("\n", " ")
-            pdf.multi_cell(180, 10, safe_line)
-        pdf_bytes = pdf.output(dest='S')
-        pdf_buffer = io.BytesIO(pdf_bytes)
-        # Regenerate and Download buttons in a row
-        col1, col2 = st.columns([1, 1])
-        regenerate_clicked = col1.button("Regenerate")
-        col2.download_button(
-            label="Download Notes as PDF",
-            data=pdf_buffer,
-            file_name="notes.pdf",
-            mime="application/pdf"
-        )
-        if regenerate_clicked:
-            if topic:
-                with st.spinner("Regenerating notes..."):
-                    response = generate_detailed_notes(topic)
-                    if response:
-                        st.session_state['notes'] = response
-                    else:
-                        st.error("Failed to generate notes. Please try again.")
+    pdf.set_left_margin(15)
+    pdf.set_right_margin(15)
+    
+    # Use built-in Arial font (no external files needed)
+    pdf.set_font("Arial", "B", 16)
+    pdf.cell(0, 15, "Generated Notes", ln=True, align="C")
+    pdf.ln(5)
+    
+    pdf.set_font("Arial", "", 12)
+    
+    # Process the notes text and handle special characters
+    notes_text = st.session_state['notes']
+    # Remove or replace problematic characters
+    notes_text = notes_text.encode('latin1', errors='ignore').decode('latin1')
+    
+    for line in notes_text.splitlines():
+        if line.strip():  # Skip empty lines
+            # Split long lines to fit page width
+            words = line.split()
+            current_line = ""
+            for word in words:
+                test_line = current_line + " " + word if current_line else word
+                # Approximate character limit per line (adjust based on font size)
+                if len(test_line) > 80:
+                    if current_line:
+                        pdf.multi_cell(0, 8, current_line.strip())
+                    current_line = word
+                else:
+                    current_line = test_line
+            if current_line:
+                pdf.multi_cell(0, 8, current_line.strip())
+        else:
+            pdf.ln(4)  # Add space for empty lines
+    
+    pdf_bytes = pdf.output(dest='S').encode('latin1')
+    pdf_buffer = io.BytesIO(pdf_bytes)
+    
+    # Regenerate and Download buttons in a row
+    col1, col2 = st.columns([1, 1])
+    regenerate_clicked = col1.button("Regenerate")
+    col2.download_button(
+        label="Download Notes as PDF",
+        data=pdf_buffer.getvalue(),
+        file_name="notes.pdf",
+        mime="application/pdf"
+    )
+    
+    if regenerate_clicked:
+        if topic:
+            with st.spinner("Regenerating notes..."):
+                response = generate_detailed_notes(topic)
+                if response:
+                    st.session_state['notes'] = response
+                else:
+                    st.error("Failed to generate notes. Please try again.")
 
 # --- Go Premium Button in Sidebar ---
 st.sidebar.markdown('''<hr style="margin-top:2em;margin-bottom:0.5em;">''', unsafe_allow_html=True)
