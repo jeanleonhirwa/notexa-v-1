@@ -1,35 +1,22 @@
 import streamlit as st
 import analytics
-import requests
 import json
-from datetime import datetime, timedelta
-from dotenv import load_dotenv
+import sys
 import os
+from datetime import datetime, timedelta
 import base64
 from io import BytesIO
 import matplotlib.pyplot as plt
 
-# Load environment variables
-load_dotenv()
-API_KEY = os.getenv("API_KEY")
+# Add parent directory to path to import gemini_api
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from gemini_api import call_gemini_api
 
 analytics.load_analytics()
 st.set_page_config(
     page_title="Notexa -Learning Made Simple.",
     page_icon="assets/logo.png"
 )
-
-def ask_gemini(prompt):
-    url = f"https://generativelanguage.googleapis.com/v1/models/gemini-2.5-pro:generateContent?key={API_KEY}"
-    headers = {"Content-Type": "application/json"}
-    data = {"contents": [{"parts": [{"text": prompt}]}]}
-
-    try:
-        res = requests.post(url, headers=headers, json=data)
-        res.raise_for_status()
-        return res.json()['candidates'][0]['content']['parts'][0]['text']
-    except Exception as e:
-        return f"❌ Gemini API error: {e}"
 
 def create_study_plan(subject, exam_date, confidence_level, available_hours):
     days_until_exam = (exam_date - datetime.now().date()).days
@@ -54,7 +41,7 @@ def create_study_plan(subject, exam_date, confidence_level, available_hours):
     [how to review previous days' content]
     """
     
-    response = ask_gemini(prompt)
+    response = call_gemini_api(prompt)
     if response.startswith("❌"):
         st.error(response)
         return None
@@ -78,7 +65,7 @@ def generate_quiz(topic):
     1. [Correct option]: [Explanation]
     """
     
-    response = ask_gemini(prompt)
+    response = call_gemini_api(prompt)
     if response.startswith("❌"):
         st.error(response)
         return None
@@ -95,7 +82,7 @@ def generate_flashcards(topic):
     
     Continue for all 5 cards...
     """
-    return ask_gemini(prompt)
+    return call_gemini_api(prompt)
 
 def generate_mind_map(topic):
     prompt = f"""
@@ -110,7 +97,7 @@ def generate_mind_map(topic):
             ▪ [Sub-concept 2.1]
             ▪ [Sub-concept 2.2]
     """
-    return ask_gemini(prompt)
+    return call_gemini_api(prompt)
 
 def get_learning_style_tips(learning_style):
     prompt = f"""
@@ -123,25 +110,47 @@ def get_learning_style_tips(learning_style):
     
     Include practical examples for each technique.
     """
-    return ask_gemini(prompt)
+    return call_gemini_api(prompt)
 
 def create_pdf_summary(subject, plan, quiz):
+    from fpdf import FPDF
+    
     pdf = FPDF()
     pdf.add_page()
-    pdf.set_font("Arial", size=12)
+    pdf.set_font("Arial", "B", 16)
     
-    # Add content
-    pdf.cell(200, 10, txt=f"Study Plan: {subject}", ln=True, align='C')
-    pdf.multi_cell(0, 10, txt=plan)
+    # Add title
+    pdf.cell(0, 15, txt=f"Study Plan: {subject}", ln=True, align='C')
+    pdf.ln(5)
+    
+    # Add plan content
+    pdf.set_font("Arial", "", 12)
+    
+    # Process text to handle encoding issues
+    plan_text = plan.encode('latin1', errors='ignore').decode('latin1') if plan else "No plan available"
+    for line in plan_text.splitlines():
+        if line.strip():
+            pdf.multi_cell(0, 8, txt=line.strip())
+        else:
+            pdf.ln(4)
+    
     if quiz:
         pdf.add_page()
-        pdf.cell(200, 10, txt="Practice Quiz", ln=True, align='C')
-        pdf.multi_cell(0, 10, txt=quiz)
+        pdf.set_font("Arial", "B", 16)
+        pdf.cell(0, 15, txt="Practice Quiz", ln=True, align='C')
+        pdf.ln(5)
+        
+        pdf.set_font("Arial", "", 12)
+        quiz_text = quiz.encode('latin1', errors='ignore').decode('latin1')
+        for line in quiz_text.splitlines():
+            if line.strip():
+                pdf.multi_cell(0, 8, txt=line.strip())
+            else:
+                pdf.ln(4)
     
     # Return PDF as base64 string
-    pdf_output = BytesIO()
-    pdf.output(pdf_output)
-    pdf_base64 = base64.b64encode(pdf_output.getvalue()).decode()
+    pdf_bytes = pdf.output(dest='S').encode('latin1')
+    pdf_base64 = base64.b64encode(pdf_bytes).decode()
     return pdf_base64
 
 # Add custom CSS for better UI
