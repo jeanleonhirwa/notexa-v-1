@@ -6,30 +6,16 @@ st.set_page_config(
     page_title="Notexa -Learning Made Simple.",
     page_icon="assets/logo.png"
 )
-import requests
 import os
 import tempfile
 import fitz  # PyMuPDF
 from docx import Document
 from io import BytesIO
+import sys
 
-# --- Gemini API Setup ---
-API_KEY = os.getenv("API_KEY")
-
-def ask_gemini(text):
-    prompt = (
-        "Generate academic quiz from this academic notes, Quiz should have 3 sections, section A(must include 8 multiple choice questions), section B(must include 4 questions, 2 of True or False and 2 questions of Fill in blanks) and Section C(must include 2 open-ended questions):\n\n"
-        f"{text}\n\nQuiz:"
-    )
-    url = f"https://generativelanguage.googleapis.com/v1/models/gemini-2.5-pro:generateContent?key=AIzaSyAY0FuRkzB9yzsdi9v40g7OjPME_f2WWik"
-    headers = {"Content-Type": "application/json"}
-    data = {"contents": [{"parts": [{"text": prompt}]}]}
-    try:
-        res = requests.post(url, headers=headers, json=data)
-        res.raise_for_status()
-        return res.json()['candidates'][0]['content']['parts'][0]['text']
-    except Exception as e:
-        return f"❌ Gemini API error: {e}"
+# Add parent directory to path to import gemini_api
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from gemini_api import generate_quiz_from_notes
 
 def extract_text(file):
     if file.type == "application/pdf":
@@ -111,7 +97,7 @@ if uploaded_file:
     else:
         if st.button("Generate Quiz", use_container_width=True):
             with st.spinner("Generating Quiz..."):
-                summary = ask_gemini(text)
+                summary = generate_quiz_from_notes(text)
                 if not summary or summary.startswith("❌"):
                     st.warning("Sorry, we couldn't generate a Quiz. Please try again.")
                 else:

@@ -6,26 +6,13 @@ st.set_page_config(
     page_title="Notexa -Learning Made Simple.",
     page_icon="assets/logo.png"
 )
-import requests
-import os
-from dotenv import load_dotenv
 from fpdf import FPDF
+import os
+import sys
 
-# Load environment variables from .env file
-load_dotenv()
-API_KEY = os.getenv("API_KEY")
-
-def ask_gemini(prompt):
-    url = f"https://generativelanguage.googleapis.com/v1/models/gemini-2.5-pro:generateContent?key={API_KEY}"
-    headers = {"Content-Type": "application/json"}
-    data = {"contents": [{"parts": [{"text": prompt}]}]}
-
-    try:
-        res = requests.post(url, headers=headers, json=data)
-        res.raise_for_status()
-        return res.json()['candidates'][0]['content']['parts'][0]['text']
-    except Exception as e:
-        return f"❌ Gemini API error: {e}"
+# Add parent directory to path to import gemini_api
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from gemini_api import generate_detailed_notes
 
 # --- Streamlit UI for Notexa ---
 st.title("Notexa - AI Note Generator")
@@ -43,10 +30,7 @@ if not st.session_state['notes']:
     if st.button("Generate"):
         if topic:
             with st.spinner("Generating notes..."):
-                prompt = (
-                    f"Generate academic detailed notes that are not too long and easy to understand about this topic: {topic}. Keep it simple."
-                )
-                response = ask_gemini(prompt)
+                response = generate_detailed_notes(topic)
                 if response:
                     st.session_state['notes'] = response
                 else:
@@ -95,10 +79,7 @@ if st.session_state['notes']:
         if regenerate_clicked:
             if topic:
                 with st.spinner("Regenerating notes..."):
-                    prompt = (
-                        f"Generate academic detailed notes that are not too long and easy to understand about this topic: {topic}. Keep it simple."
-                    )
-                    response = ask_gemini(prompt)
+                    response = generate_detailed_notes(topic)
                     if response:
                         st.session_state['notes'] = response
                     else:

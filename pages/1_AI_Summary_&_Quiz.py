@@ -6,27 +6,14 @@ st.set_page_config(
     page_title="Notexa -Learning Made Simple.",
     page_icon="assets/logo.png"
 )
-import requests
-import os
-from dotenv import load_dotenv
 from fpdf import FPDF
 import io
+import sys
+import os
 
-# Load environment variables from .env file
-load_dotenv()
-API_KEY = os.getenv("API_KEY")
-
-def ask_gemini(prompt):
-    url = f"https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key={API_KEY}"
-    headers = {"Content-Type": "application/json"}
-    data = {"contents": [{"parts": [{"text": prompt}]}]}
-
-    try:
-        res = requests.post(url, headers=headers, json=data)
-        res.raise_for_status()
-        return res.json()['candidates'][0]['content']['parts'][0]['text']
-    except Exception as e:
-        return f"❌ Gemini API error: {e}"
+# Add parent directory to path to import gemini_api
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from gemini_api import generate_summary_and_quiz
 
 # --- Streamlit UI for Notexa ---
 st.title("Notexa - AI Summary and Quiz Generator")
@@ -39,11 +26,7 @@ topic = st.text_input("Topic or Question:")
 if st.button("Generate"):
     if topic:
         with st.spinner("Generating summary and quiz..."):
-            prompt = (
-                f"Give a short and clear summary about this topic: {topic}. "
-                "Then generate 3 quiz questions with answers based on that topic."
-            )
-            response = ask_gemini(prompt)
+            response = generate_summary_and_quiz(topic)
             if response.startswith("❌"):
                 st.error(response)
             else:
